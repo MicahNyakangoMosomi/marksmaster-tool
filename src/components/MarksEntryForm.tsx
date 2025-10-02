@@ -10,11 +10,19 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-interface MarksEntryFormProps {
-  onSubmit: (data: any) => void;
+interface Student {
+  id: number;
+  name: string;
+  rollNumber?: string;
 }
 
-const subjects = [
+interface MarksEntryFormProps {
+  students?: Student[];
+  subjects?: string[];
+  onSubmit?: (data: any) => void;
+}
+
+const defaultSubjects = [
   "Mathematics",
   "English",
   "Science",
@@ -27,7 +35,7 @@ const subjects = [
   "Physical Education",
 ];
 
-const students = [
+const defaultStudents = [
   { id: 1, name: "John Smith", grade: "10A" },
   { id: 2, name: "Emma Johnson", grade: "10A" },
   { id: 3, name: "Michael Brown", grade: "10B" },
@@ -38,7 +46,11 @@ const students = [
   { id: 8, name: "Olivia Anderson", grade: "10A" },
 ];
 
-export const MarksEntryForm = ({ onSubmit }: MarksEntryFormProps) => {
+export const MarksEntryForm = ({ 
+  students = defaultStudents, 
+  subjects = defaultSubjects,
+  onSubmit = () => {} 
+}: MarksEntryFormProps) => {
   const [formData, setFormData] = useState({
     studentId: "",
     studentName: "",
@@ -84,7 +96,7 @@ export const MarksEntryForm = ({ onSubmit }: MarksEntryFormProps) => {
             <SelectContent>
               {students.map((student) => (
                 <SelectItem key={student.id} value={student.id.toString()}>
-                  {student.name} - {student.grade}
+                  {student.name}
                 </SelectItem>
               ))}
             </SelectContent>

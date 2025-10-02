@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Layout } from "./components/Layout";
 import Dashboard from "./pages/Dashboard";
 import Class from "./pages/Class";
+import ClassDetail from "./pages/ClassDetail";
 import Reports from "./pages/Reports";
 import Grading from "./pages/Grading";
 import NotFound from "./pages/NotFound";
@@ -22,6 +23,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/class" element={<Class />} />
+            <Route path="/class/:classId" element={<ClassDetail />} />
             <Route path="/reports" element={<Reports />} />
             <Route path="/grading" element={<Grading />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

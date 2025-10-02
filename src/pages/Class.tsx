@@ -1,18 +1,9 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Users, BookOpen } from "lucide-react";
+import { Plus, Users, BookOpen, ChevronRight } from "lucide-react";
 import { AddClassDialog } from "@/components/AddClassDialog";
-import { AddStudentToClassDialog } from "@/components/AddStudentToClassDialog";
-import { AddSubjectToClassDialog } from "@/components/AddSubjectToClassDialog";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { useNavigate } from "react-router-dom";
 
 interface ClassData {
   id: number;
@@ -30,32 +21,14 @@ const initialClasses: ClassData[] = [
 const Class = () => {
   const [classes, setClasses] = useState<ClassData[]>(initialClasses);
   const [isAddClassOpen, setIsAddClassOpen] = useState(false);
-  const [isAddStudentOpen, setIsAddStudentOpen] = useState(false);
-  const [isAddSubjectOpen, setIsAddSubjectOpen] = useState(false);
-  const [selectedClass, setSelectedClass] = useState<ClassData | null>(null);
+  const navigate = useNavigate();
 
   const handleAddClass = (newClass: Omit<ClassData, "id">) => {
     setClasses([...classes, { ...newClass, id: classes.length + 1 }]);
   };
 
-  const handleAddStudent = () => {
-    if (selectedClass) {
-      setClasses(classes.map(c => 
-        c.id === selectedClass.id 
-          ? { ...c, studentCount: c.studentCount + 1 }
-          : c
-      ));
-    }
-  };
-
-  const handleAddSubject = (subject: string) => {
-    if (selectedClass) {
-      setClasses(classes.map(c => 
-        c.id === selectedClass.id 
-          ? { ...c, subjects: [...c.subjects, subject] }
-          : c
-      ));
-    }
+  const handleClassClick = (classId: number) => {
+    navigate(`/class/${classId}`);
   };
 
   return (
@@ -74,67 +47,52 @@ const Class = () => {
           </Button>
         </div>
 
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Class Name</TableHead>
-                <TableHead>Grade</TableHead>
-                <TableHead>Students</TableHead>
-                <TableHead>Subjects</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {classes.map((classData) => (
-                <TableRow key={classData.id}>
-                  <TableCell className="font-medium">{classData.name}</TableCell>
-                  <TableCell>{classData.grade}</TableCell>
-                  <TableCell>{classData.studentCount}</TableCell>
-                  <TableCell>
-                    <div className="flex flex-wrap gap-1">
-                      {classData.subjects.slice(0, 2).map((subject) => (
-                        <span key={subject} className="text-xs bg-secondary px-2 py-1 rounded">
-                          {subject}
-                        </span>
-                      ))}
-                      {classData.subjects.length > 2 && (
-                        <span className="text-xs text-muted-foreground">
-                          +{classData.subjects.length - 2} more
-                        </span>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => {
-                          setSelectedClass(classData);
-                          setIsAddStudentOpen(true);
-                        }}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {classes.map((classData) => (
+            <Card
+              key={classData.id}
+              className="p-6 cursor-pointer hover:shadow-lg transition-shadow border-2 hover:border-primary"
+              onClick={() => handleClassClick(classData.id)}
+            >
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <h4 className="text-xl font-semibold text-foreground mb-1">
+                    {classData.name}
+                  </h4>
+                  <p className="text-sm text-muted-foreground">Grade {classData.grade}</p>
+                </div>
+                <ChevronRight className="h-5 w-5 text-muted-foreground" />
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <Users className="h-4 w-4 text-primary" />
+                  <span className="text-sm text-foreground">
+                    {classData.studentCount} Students
+                  </span>
+                </div>
+
+                <div className="flex items-start gap-2">
+                  <BookOpen className="h-4 w-4 text-primary mt-0.5" />
+                  <div className="flex flex-wrap gap-1">
+                    {classData.subjects.slice(0, 3).map((subject) => (
+                      <span
+                        key={subject}
+                        className="text-xs bg-secondary px-2 py-1 rounded"
                       >
-                        <Users className="mr-1 h-3 w-3" />
-                        Add Student
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => {
-                          setSelectedClass(classData);
-                          setIsAddSubjectOpen(true);
-                        }}
-                      >
-                        <BookOpen className="mr-1 h-3 w-3" />
-                        Add Subject
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                        {subject}
+                      </span>
+                    ))}
+                    {classData.subjects.length > 3 && (
+                      <span className="text-xs text-muted-foreground px-2 py-1">
+                        +{classData.subjects.length - 3} more
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </Card>
+          ))}
         </div>
       </Card>
 
@@ -142,20 +100,6 @@ const Class = () => {
         open={isAddClassOpen}
         onOpenChange={setIsAddClassOpen}
         onAddClass={handleAddClass}
-      />
-
-      <AddStudentToClassDialog
-        open={isAddStudentOpen}
-        onOpenChange={setIsAddStudentOpen}
-        classData={selectedClass}
-        onAddStudent={handleAddStudent}
-      />
-
-      <AddSubjectToClassDialog
-        open={isAddSubjectOpen}
-        onOpenChange={setIsAddSubjectOpen}
-        classData={selectedClass}
-        onAddSubject={handleAddSubject}
       />
     </div>
   );
