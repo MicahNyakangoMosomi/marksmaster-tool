@@ -25,15 +25,16 @@ interface AddStudentDialogProps {
 export const AddStudentDialog = ({ open, onOpenChange, onAddStudent }: AddStudentDialogProps) => {
   const [formData, setFormData] = useState({
     name: "",
-    grade: "",
+    gender: "",
     rollNumber: "",
+    grade: "",
     averageScore: 0,
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onAddStudent(formData);
-    setFormData({ name: "", grade: "", rollNumber: "", averageScore: 0 });
+    setFormData({ name: "", gender: "", rollNumber: "", grade: "", averageScore: 0 });
     onOpenChange(false);
   };
 
@@ -53,6 +54,21 @@ export const AddStudentDialog = ({ open, onOpenChange, onAddStudent }: AddStuden
               placeholder="Enter student name"
               required
             />
+          </div>
+          <div>
+            <Label htmlFor="gender">Gender</Label>
+            <Select
+              value={formData.gender}
+              onValueChange={(value) => setFormData({ ...formData, gender: value })}
+            >
+              <SelectTrigger id="gender">
+                <SelectValue placeholder="Select gender" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Male">Male</SelectItem>
+                <SelectItem value="Female">Female</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <div>
             <Label htmlFor="rollNumber">Roll Number</Label>

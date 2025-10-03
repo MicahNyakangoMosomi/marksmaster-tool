@@ -8,6 +8,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface AddStudentToClassDialogProps {
   open: boolean;
@@ -24,13 +31,14 @@ export const AddStudentToClassDialog = ({
 }: AddStudentToClassDialogProps) => {
   const [formData, setFormData] = useState({
     name: "",
+    gender: "",
     rollNumber: "",
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onAddStudent(formData);
-    setFormData({ name: "", rollNumber: "" });
+    setFormData({ name: "", gender: "", rollNumber: "" });
     onOpenChange(false);
   };
 
@@ -50,6 +58,21 @@ export const AddStudentToClassDialog = ({
               placeholder="Enter student name"
               required
             />
+          </div>
+          <div>
+            <Label htmlFor="gender">Gender</Label>
+            <Select
+              value={formData.gender}
+              onValueChange={(value) => setFormData({ ...formData, gender: value })}
+            >
+              <SelectTrigger id="gender">
+                <SelectValue placeholder="Select gender" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Male">Male</SelectItem>
+                <SelectItem value="Female">Female</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <div>
             <Label htmlFor="rollNumber">Roll Number</Label>
