@@ -237,118 +237,109 @@ Grade: ${student.grade}
     }));
 
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-6">
+      <div className="container mx-auto px-4 py-6">
+        <div className="mb-4">
           <Button
             variant="ghost"
             onClick={() => setSelectedStudent(null)}
-            className="mb-4"
+            className="mb-2"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Students
           </Button>
-          <h2 className="text-3xl font-bold text-foreground mb-2">
-            Student Report Card
-          </h2>
         </div>
 
-        <div className="space-y-6">
-          {/* Student Details Card */}
-          <Card className="p-6">
-            <h3 className="text-xl font-semibold mb-4">Student Details</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div>
-                <p className="text-sm text-muted-foreground">Name</p>
-                <p className="font-semibold">{selectedStudent.name}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Roll Number</p>
-                <p className="font-semibold">{selectedStudent.rollNumber}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Gender</p>
-                <p className="font-semibold">{selectedStudent.gender}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Class</p>
-                <p className="font-semibold">{selectedClass.name}</p>
-              </div>
+        <Card className="p-6">
+          <div className="flex justify-between items-start mb-4">
+            <h2 className="text-2xl font-bold text-foreground">Student Report Card</h2>
+            <div className="flex gap-2">
+              <Button onClick={handlePrintStudent} size="sm">
+                <Printer className="mr-2 h-4 w-4" />
+                Print
+              </Button>
+              <Button onClick={handleDownloadStudent} size="sm">
+                <Download className="mr-2 h-4 w-4" />
+                Download
+              </Button>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-              <div>
-                <p className="text-sm text-muted-foreground">Overall Average</p>
-                <p className="text-2xl font-bold text-primary">{selectedStudent.average}%</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Overall Grade</p>
-                <p className="text-2xl font-bold text-primary">{selectedStudent.grade}</p>
-              </div>
-            </div>
-          </Card>
-
-          {/* Subject Performance Table */}
-          <Card className="p-6">
-            <h3 className="text-xl font-semibold mb-4">Subject-wise Performance</h3>
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Subject</TableHead>
-                    <TableHead className="text-center">Marks Obtained</TableHead>
-                    <TableHead className="text-center">Maximum Marks</TableHead>
-                    <TableHead className="text-center">Percentage</TableHead>
-                    <TableHead className="text-center">Grade</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {selectedStudent.subjects.map((subject, index) => (
-                    <TableRow key={index}>
-                      <TableCell className="font-medium">{subject.subject}</TableCell>
-                      <TableCell className="text-center">{subject.marks}</TableCell>
-                      <TableCell className="text-center">{subject.maxMarks}</TableCell>
-                      <TableCell className="text-center">
-                        {((subject.marks / subject.maxMarks) * 100).toFixed(1)}%
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <span className="px-2 py-1 bg-primary/10 text-primary rounded text-sm font-medium">
-                          {subject.grade}
-                        </span>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          </Card>
-
-          {/* Performance Chart */}
-          <Card className="p-6">
-            <h3 className="text-xl font-semibold mb-4">Performance Graph</h3>
-            <ResponsiveContainer width="100%" height={350}>
-              <BarChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis domain={[0, 100]} />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="marks" fill="hsl(var(--primary))" name="Marks Obtained" />
-                <Bar dataKey="maxMarks" fill="hsl(var(--muted))" name="Maximum Marks" />
-              </BarChart>
-            </ResponsiveContainer>
-          </Card>
-
-          {/* Action Buttons */}
-          <div className="flex justify-end gap-3">
-            <Button onClick={handlePrintStudent}>
-              <Printer className="mr-2 h-4 w-4" />
-              Print Report
-            </Button>
-            <Button onClick={handleDownloadStudent}>
-              <Download className="mr-2 h-4 w-4" />
-              Download Report
-            </Button>
           </div>
-        </div>
+
+          {/* Student Details - Compact Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4 pb-4 border-b">
+            <div>
+              <p className="text-xs text-muted-foreground">Name</p>
+              <p className="font-semibold text-sm">{selectedStudent.name}</p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Roll Number</p>
+              <p className="font-semibold text-sm">{selectedStudent.rollNumber}</p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Gender</p>
+              <p className="font-semibold text-sm">{selectedStudent.gender}</p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Class</p>
+              <p className="font-semibold text-sm">{selectedClass.name}</p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Overall Average</p>
+              <p className="text-lg font-bold text-primary">{selectedStudent.average}%</p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Overall Grade</p>
+              <p className="text-lg font-bold text-primary">{selectedStudent.grade}</p>
+            </div>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-4">
+            {/* Subject Performance Table */}
+            <div>
+              <h3 className="text-lg font-semibold mb-3">Subject Performance</h3>
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="py-2">Subject</TableHead>
+                      <TableHead className="text-center py-2">Marks</TableHead>
+                      <TableHead className="text-center py-2">Grade</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {selectedStudent.subjects.map((subject, index) => (
+                      <TableRow key={index}>
+                        <TableCell className="py-2 font-medium text-sm">{subject.subject}</TableCell>
+                        <TableCell className="text-center py-2 text-sm">
+                          {subject.marks}/{subject.maxMarks}
+                        </TableCell>
+                        <TableCell className="text-center py-2">
+                          <span className="px-2 py-0.5 bg-primary/10 text-primary rounded text-xs font-medium">
+                            {subject.grade}
+                          </span>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
+
+            {/* Performance Chart */}
+            <div>
+              <h3 className="text-lg font-semibold mb-3">Performance Graph</h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+                  <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} />
+                  <Tooltip />
+                  <Legend wrapperStyle={{ fontSize: '12px' }} />
+                  <Bar dataKey="marks" fill="hsl(var(--primary))" name="Marks" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </Card>
       </div>
     );
   }
