@@ -155,6 +155,7 @@ const classesData: ClassData[] = [
 const Reports = () => {
   const [selectedClass, setSelectedClass] = useState<ClassData | null>(null);
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+  const [printAllMode, setPrintAllMode] = useState(false);
 
   const handleViewReport = (student: Student) => {
     setSelectedStudent(student);
@@ -198,7 +199,10 @@ ${subject.subject}: ${subject.marks}/${subject.maxMarks} - Grade: ${subject.grad
   };
 
   const handlePrintAll = () => {
-    window.print();
+    setPrintAllMode(true);
+    setTimeout(() => {
+      window.print();
+    }, 500);
   };
 
   const handleDownloadAll = () => {
@@ -228,6 +232,147 @@ Grade: ${student.grade}
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   };
+
+  // Print All Mode View
+  if (printAllMode && selectedClass) {
+    return (
+      <div>
+        <style>{`
+          @media print {
+            body * {
+              visibility: hidden;
+            }
+            .printable-all-reports, .printable-all-reports * {
+              visibility: visible;
+            }
+            .printable-all-reports {
+              position: absolute;
+              left: 0;
+              top: 0;
+              width: 100%;
+            }
+            .no-print {
+              display: none !important;
+            }
+            .page-break {
+              page-break-after: always;
+              break-after: page;
+            }
+            @page {
+              size: A4;
+              margin: 1cm;
+            }
+          }
+        `}</style>
+        
+        <div className="container mx-auto px-4 py-6 no-print">
+          <Button
+            variant="ghost"
+            onClick={() => setPrintAllMode(false)}
+            className="mb-4"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Class
+          </Button>
+          <Button onClick={() => window.print()} className="mb-4 ml-4">
+            <Printer className="mr-2 h-4 w-4" />
+            Print All
+          </Button>
+        </div>
+
+        <div className="printable-all-reports">
+          {selectedClass.students.map((student, index) => {
+            const chartData = student.subjects.map(subject => ({
+              name: subject.subject,
+              marks: subject.marks,
+              maxMarks: subject.maxMarks,
+            }));
+
+            return (
+              <div key={student.id} className={index < selectedClass.students.length - 1 ? "page-break" : ""}>
+                <Card className="p-6 mb-8">
+                  <h2 className="text-2xl font-bold text-foreground mb-4">Student Report Card</h2>
+                  
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4 pb-4 border-b">
+                    <div>
+                      <p className="text-xs text-muted-foreground">Name</p>
+                      <p className="font-semibold text-sm">{student.name}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Roll Number</p>
+                      <p className="font-semibold text-sm">{student.rollNumber}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Gender</p>
+                      <p className="font-semibold text-sm">{student.gender}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Class</p>
+                      <p className="font-semibold text-sm">{selectedClass.name}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Overall Average</p>
+                      <p className="text-lg font-bold text-primary">{student.average}%</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Overall Grade</p>
+                      <p className="text-lg font-bold text-primary">{student.grade}</p>
+                    </div>
+                  </div>
+
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <h3 className="text-lg font-semibold mb-3">Subject Performance</h3>
+                      <div className="rounded-md border">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead className="py-2">Subject</TableHead>
+                              <TableHead className="text-center py-2">Marks</TableHead>
+                              <TableHead className="text-center py-2">Grade</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {student.subjects.map((subject, idx) => (
+                              <TableRow key={idx}>
+                                <TableCell className="py-2 font-medium text-sm">{subject.subject}</TableCell>
+                                <TableCell className="text-center py-2 text-sm">
+                                  {subject.marks}/{subject.maxMarks}
+                                </TableCell>
+                                <TableCell className="text-center py-2">
+                                  <span className="px-2 py-0.5 bg-primary/10 text-primary rounded text-xs font-medium">
+                                    {subject.grade}
+                                  </span>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h3 className="text-lg font-semibold mb-3">Performance Graph</h3>
+                      <ResponsiveContainer width="100%" height={300}>
+                        <BarChart data={chartData}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+                          <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} />
+                          <Tooltip />
+                          <Legend wrapperStyle={{ fontSize: '12px' }} />
+                          <Bar dataKey="marks" fill="hsl(var(--primary))" name="Marks" />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+                </Card>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
 
   if (selectedStudent && selectedClass) {
     const chartData = selectedStudent.subjects.map(subject => ({
