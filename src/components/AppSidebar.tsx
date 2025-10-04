@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, FileText, BookOpen } from "lucide-react";
+import { LayoutDashboard, Users, FileText, BookOpen, ClipboardEdit } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import {
   Sidebar,
@@ -15,6 +15,7 @@ import {
 const items = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
   { title: "Class", url: "/class", icon: Users },
+  { title: "Marks Entry", url: "/marks-entry", icon: ClipboardEdit },
   { title: "Reports", url: "/reports", icon: FileText },
   { title: "Grading", url: "/grading", icon: BookOpen },
 ];

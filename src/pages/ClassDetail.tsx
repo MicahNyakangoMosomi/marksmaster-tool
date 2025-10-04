@@ -2,11 +2,9 @@ import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { ArrowLeft, Plus, Users, BookOpen, FileText, Save } from "lucide-react";
+import { ArrowLeft, Plus, Users, BookOpen } from "lucide-react";
 import { AddStudentToClassDialog } from "@/components/AddStudentToClassDialog";
 import { AddSubjectToClassDialog } from "@/components/AddSubjectToClassDialog";
-import { useToast } from "@/hooks/use-toast";
 import {
   Table,
   TableBody,
@@ -26,10 +24,6 @@ interface Student {
   id: number;
   name: string;
   rollNumber: string;
-}
-
-interface StudentMarks {
-  [subjectName: string]: string;
 }
 
 interface ClassData {
@@ -69,24 +63,11 @@ const initialClassesData: ClassData[] = [
 const ClassDetail = () => {
   const { classId } = useParams();
   const navigate = useNavigate();
-  const { toast } = useToast();
   const [classData, setClassData] = useState<ClassData | undefined>(
     initialClassesData.find((c) => c.id === Number(classId))
   );
   const [isAddStudentOpen, setIsAddStudentOpen] = useState(false);
   const [isAddSubjectOpen, setIsAddSubjectOpen] = useState(false);
-  
-  // Initialize marks state with empty values for each student and subject
-  const [marks, setMarks] = useState<Record<number, StudentMarks>>(() => {
-    const initialMarks: Record<number, StudentMarks> = {};
-    classData?.students.forEach((student) => {
-      initialMarks[student.id] = {};
-      classData.subjects.forEach((subject) => {
-        initialMarks[student.id][subject] = "";
-      });
-    });
-    return initialMarks;
-  });
 
   if (!classData) {
     return (
@@ -118,38 +99,9 @@ const ClassDetail = () => {
   const handleAddSubject = (subject: string) => {
     if (!classData) return;
     
-    // Add subject to class data
-    const updatedClassData = {
+    setClassData({
       ...classData,
       subjects: [...classData.subjects, subject],
-    };
-    setClassData(updatedClassData);
-    
-    // Initialize marks for the new subject for all students
-    const updatedMarks = { ...marks };
-    classData.students.forEach((student) => {
-      updatedMarks[student.id] = {
-        ...updatedMarks[student.id],
-        [subject]: "",
-      };
-    });
-    setMarks(updatedMarks);
-  };
-
-  const handleMarkChange = (studentId: number, subject: string, value: string) => {
-    setMarks({
-      ...marks,
-      [studentId]: {
-        ...marks[studentId],
-        [subject]: value,
-      },
-    });
-  };
-
-  const handleSaveMarks = () => {
-    toast({
-      title: "Marks Saved",
-      description: "Student marks have been saved successfully.",
     });
   };
 
@@ -173,7 +125,7 @@ const ClassDetail = () => {
       </div>
 
       <Tabs defaultValue="students" className="space-y-6">
-        <TabsList className="grid w-full max-w-[600px] grid-cols-3">
+        <TabsList className="grid w-full max-w-[400px] grid-cols-2">
           <TabsTrigger value="students">
             <Users className="mr-2 h-4 w-4" />
             Students
@@ -181,10 +133,6 @@ const ClassDetail = () => {
           <TabsTrigger value="subjects">
             <BookOpen className="mr-2 h-4 w-4" />
             Subjects
-          </TabsTrigger>
-          <TabsTrigger value="marks">
-            <FileText className="mr-2 h-4 w-4" />
-            Marks Entry
           </TabsTrigger>
         </TabsList>
 
@@ -250,80 +198,6 @@ const ClassDetail = () => {
           </Card>
         </TabsContent>
 
-        <TabsContent value="marks">
-          <Card className="p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-semibold text-foreground">
-                Enter Student Marks
-              </h3>
-              <Button onClick={handleSaveMarks}>
-                <Save className="mr-2 h-4 w-4" />
-                Save All Marks
-              </Button>
-            </div>
-
-            <div className="overflow-x-auto">
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[120px] sticky left-0 bg-background z-10">
-                        Roll No.
-                      </TableHead>
-                      <TableHead className="w-[200px] sticky left-[120px] bg-background z-10">
-                        Student Name
-                      </TableHead>
-                      {classData.subjects.map((subject) => (
-                        <TableHead key={subject} className="text-center min-w-[120px]">
-                          {subject}
-                        </TableHead>
-                      ))}
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {classData.students.map((student) => (
-                      <TableRow key={student.id}>
-                        <TableCell className="font-medium sticky left-0 bg-background">
-                          {student.rollNumber}
-                        </TableCell>
-                        <TableCell className="sticky left-[120px] bg-background">
-                          {student.name}
-                        </TableCell>
-                        {classData.subjects.map((subject) => (
-                          <TableCell key={`${student.id}-${subject}`} className="p-2">
-                            <Input
-                              type="number"
-                              min="0"
-                              max="100"
-                              placeholder="0-100"
-                              value={marks[student.id]?.[subject] || ""}
-                              onChange={(e) =>
-                                handleMarkChange(student.id, subject, e.target.value)
-                              }
-                              className="w-full text-center"
-                            />
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            </div>
-
-            {classData.students.length === 0 && (
-              <div className="text-center py-8 text-muted-foreground">
-                No students in this class. Add students to enter marks.
-              </div>
-            )}
-            
-            {classData.subjects.length === 0 && classData.students.length > 0 && (
-              <div className="text-center py-8 text-muted-foreground">
-                No subjects added. Add subjects to enter marks.
-              </div>
-            )}
-          </Card>
-        </TabsContent>
       </Tabs>
 
       <AddStudentToClassDialog
