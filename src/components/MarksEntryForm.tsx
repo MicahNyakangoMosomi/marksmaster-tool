@@ -55,6 +55,7 @@ export const MarksEntryForm = ({
     studentId: "",
     studentName: "",
     subject: "",
+    term: "",
     testType: "",
     marks: "",
     maxMarks: "100",
@@ -68,6 +69,7 @@ export const MarksEntryForm = ({
       studentId: "",
       studentName: "",
       subject: "",
+      term: "",
       testType: "",
       marks: "",
       maxMarks: "100",
@@ -123,20 +125,39 @@ export const MarksEntryForm = ({
         </div>
 
         <div>
-          <Label htmlFor="testType">Test Type</Label>
+          <Label htmlFor="term">Term</Label>
+          <Select
+            value={formData.term}
+            onValueChange={(value) => setFormData({ ...formData, term: value })}
+          >
+            <SelectTrigger id="term">
+              <SelectValue placeholder="Select term" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="term1">Term 1</SelectItem>
+              <SelectItem value="term2">Term 2</SelectItem>
+              <SelectItem value="term3">Term 3</SelectItem>
+              <SelectItem value="annual">Annual</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div>
+          <Label htmlFor="testType">Exam Type</Label>
           <Select
             value={formData.testType}
             onValueChange={(value) => setFormData({ ...formData, testType: value })}
           >
             <SelectTrigger id="testType">
-              <SelectValue placeholder="Select test type" />
+              <SelectValue placeholder="Select exam type" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="quiz">Quiz</SelectItem>
-              <SelectItem value="midterm">Midterm Exam</SelectItem>
+              <SelectItem value="unit-test">Unit Test</SelectItem>
+              <SelectItem value="midterm">Mid-Term Exam</SelectItem>
               <SelectItem value="final">Final Exam</SelectItem>
               <SelectItem value="assignment">Assignment</SelectItem>
               <SelectItem value="project">Project</SelectItem>
+              <SelectItem value="practical">Practical</SelectItem>
             </SelectContent>
           </Select>
         </div>
