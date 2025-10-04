@@ -238,7 +238,32 @@ Grade: ${student.grade}
 
     return (
       <div className="container mx-auto px-4 py-6">
-        <div className="mb-4">
+        <style>{`
+          @media print {
+            body * {
+              visibility: hidden;
+            }
+            .printable-report, .printable-report * {
+              visibility: visible;
+            }
+            .printable-report {
+              position: absolute;
+              left: 0;
+              top: 0;
+              width: 100%;
+              padding: 20px;
+            }
+            .no-print {
+              display: none !important;
+            }
+            @page {
+              size: A4;
+              margin: 1cm;
+            }
+          }
+        `}</style>
+        
+        <div className="mb-4 no-print">
           <Button
             variant="ghost"
             onClick={() => setSelectedStudent(null)}
@@ -249,10 +274,10 @@ Grade: ${student.grade}
           </Button>
         </div>
 
-        <Card className="p-6">
+        <Card className="p-6 printable-report">
           <div className="flex justify-between items-start mb-4">
             <h2 className="text-2xl font-bold text-foreground">Student Report Card</h2>
-            <div className="flex gap-2">
+            <div className="flex gap-2 no-print">
               <Button onClick={handlePrintStudent} size="sm">
                 <Printer className="mr-2 h-4 w-4" />
                 Print
