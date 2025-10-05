@@ -1,9 +1,20 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Users, BookOpen, ChevronRight } from "lucide-react";
+import { Plus, Users, BookOpen, ChevronRight, Trash2 } from "lucide-react";
 import { AddClassDialog } from "@/components/AddClassDialog";
 import { useNavigate } from "react-router-dom";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
 
 interface ClassData {
   id: number;
@@ -21,6 +32,7 @@ const initialClasses: ClassData[] = [
 const Class = () => {
   const [classes, setClasses] = useState<ClassData[]>(initialClasses);
   const [isAddClassOpen, setIsAddClassOpen] = useState(false);
+  const [deleteClassId, setDeleteClassId] = useState<number | null>(null);
   const navigate = useNavigate();
 
   const handleAddClass = (newClass: Omit<ClassData, "id">) => {
@@ -29,6 +41,14 @@ const Class = () => {
 
   const handleClassClick = (classId: number) => {
     navigate(`/class/${classId}`);
+  };
+
+  const handleDeleteClass = () => {
+    if (deleteClassId) {
+      setClasses(classes.filter((c) => c.id !== deleteClassId));
+      toast.success("Class deleted successfully");
+      setDeleteClassId(null);
+    }
   };
 
   return (
@@ -51,17 +71,35 @@ const Class = () => {
           {classes.map((classData) => (
             <Card
               key={classData.id}
-              className="p-6 cursor-pointer hover:shadow-lg transition-shadow border-2 hover:border-primary"
-              onClick={() => handleClassClick(classData.id)}
+              className="p-6 hover:shadow-lg transition-shadow border-2 hover:border-primary"
             >
               <div className="flex justify-between items-start mb-4">
-                <div>
+                <div 
+                  className="flex-1 cursor-pointer"
+                  onClick={() => handleClassClick(classData.id)}
+                >
                   <h4 className="text-xl font-semibold text-foreground mb-1">
                     {classData.name}
                   </h4>
                   <p className="text-sm text-muted-foreground">Grade {classData.grade}</p>
                 </div>
-                <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                <div className="flex items-center gap-2">
+                  <ChevronRight 
+                    className="h-5 w-5 text-muted-foreground cursor-pointer" 
+                    onClick={() => handleClassClick(classData.id)}
+                  />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-destructive hover:text-destructive"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDeleteClassId(classData.id);
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
 
               <div className="space-y-3">
@@ -101,6 +139,24 @@ const Class = () => {
         onOpenChange={setIsAddClassOpen}
         onAddClass={handleAddClass}
       />
+
+      <AlertDialog open={deleteClassId !== null} onOpenChange={() => setDeleteClassId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Class</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this class? This action cannot be undone.
+              All students and subjects associated with this class will also be removed.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteClass} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

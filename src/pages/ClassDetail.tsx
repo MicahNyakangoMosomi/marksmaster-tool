@@ -2,9 +2,20 @@ import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Plus, Users, BookOpen, FileBarChart } from "lucide-react";
+import { ArrowLeft, Plus, Users, BookOpen, FileBarChart, Trash2 } from "lucide-react";
 import { AddStudentToClassDialog } from "@/components/AddStudentToClassDialog";
 import { AddSubjectToClassDialog } from "@/components/AddSubjectToClassDialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
 import {
   Table,
   TableBody,
@@ -86,6 +97,8 @@ const ClassDetail = () => {
   const [isAddSubjectOpen, setIsAddSubjectOpen] = useState(false);
   const [showExamDetailsDialog, setShowExamDetailsDialog] = useState(false);
   const [showReportView, setShowReportView] = useState(false);
+  const [deleteStudentId, setDeleteStudentId] = useState<number | null>(null);
+  const [deleteSubject, setDeleteSubject] = useState<string | null>(null);
   const [examDetails, setExamDetails] = useState({
     year: "",
     term: "",
@@ -159,6 +172,29 @@ const ClassDetail = () => {
     });
   };
 
+  const handleDeleteStudent = () => {
+    if (!classData || !deleteStudentId) return;
+    
+    setClassData({
+      ...classData,
+      students: classData.students.filter((s) => s.id !== deleteStudentId),
+      studentCount: classData.studentCount - 1,
+    });
+    toast.success("Student removed from class");
+    setDeleteStudentId(null);
+  };
+
+  const handleDeleteSubject = () => {
+    if (!classData || !deleteSubject) return;
+    
+    setClassData({
+      ...classData,
+      subjects: classData.subjects.filter((s) => s !== deleteSubject),
+    });
+    toast.success("Subject removed from class");
+    setDeleteSubject(null);
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-6">
@@ -212,6 +248,7 @@ const ClassDetail = () => {
                   <TableRow>
                     <TableHead>Roll Number</TableHead>
                     <TableHead>Name</TableHead>
+                    <TableHead className="w-[100px]">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -221,6 +258,16 @@ const ClassDetail = () => {
                         {student.rollNumber}
                       </TableCell>
                       <TableCell>{student.name}</TableCell>
+                      <TableCell>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-destructive hover:text-destructive"
+                          onClick={() => setDeleteStudentId(student.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -244,11 +291,21 @@ const ClassDetail = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {classData.subjects.map((subject) => (
                 <Card key={subject} className="p-4">
-                  <div className="flex items-center gap-3">
-                    <BookOpen className="h-5 w-5 text-primary" />
-                    <span className="font-medium text-foreground">
-                      {subject}
-                    </span>
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <BookOpen className="h-5 w-5 text-primary" />
+                      <span className="font-medium text-foreground">
+                        {subject}
+                      </span>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-destructive hover:text-destructive"
+                      onClick={() => setDeleteSubject(subject)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
                 </Card>
               ))}
@@ -442,6 +499,40 @@ const ClassDetail = () => {
         }}
         onAddSubject={handleAddSubject}
       />
+
+      <AlertDialog open={deleteStudentId !== null} onOpenChange={() => setDeleteStudentId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove Student</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove this student from the class? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteStudent} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Remove
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={deleteSubject !== null} onOpenChange={() => setDeleteSubject(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove Subject</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove this subject from the class? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteSubject} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Remove
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
