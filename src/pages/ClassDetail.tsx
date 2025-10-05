@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Plus, Users, BookOpen } from "lucide-react";
+import { ArrowLeft, Plus, Users, BookOpen, FileBarChart } from "lucide-react";
 import { AddStudentToClassDialog } from "@/components/AddStudentToClassDialog";
 import { AddSubjectToClassDialog } from "@/components/AddSubjectToClassDialog";
 import {
@@ -19,6 +19,22 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface Student {
   id: number;
@@ -68,6 +84,44 @@ const ClassDetail = () => {
   );
   const [isAddStudentOpen, setIsAddStudentOpen] = useState(false);
   const [isAddSubjectOpen, setIsAddSubjectOpen] = useState(false);
+  const [showExamDetailsDialog, setShowExamDetailsDialog] = useState(false);
+  const [showReportView, setShowReportView] = useState(false);
+  const [examDetails, setExamDetails] = useState({
+    year: "",
+    term: "",
+    examType: "",
+  });
+
+  // Mock performance data (in real app, this would come from marks entry)
+  const getStudentPerformance = () => {
+    if (!classData) return [];
+    
+    return classData.students.map((student) => ({
+      ...student,
+      marks: classData.subjects.reduce((acc, subject) => {
+        acc[subject] = Math.floor(Math.random() * 30) + 70; // Mock marks 70-100
+        return acc;
+      }, {} as Record<string, number>),
+    }));
+  };
+
+  const calculateSubjectAverage = (subject: string) => {
+    const performance = getStudentPerformance();
+    const total = performance.reduce((sum, student) => sum + student.marks[subject], 0);
+    return (total / performance.length).toFixed(2);
+  };
+
+  const handleViewReport = () => {
+    setShowExamDetailsDialog(true);
+  };
+
+  const handleExamDetailsSubmit = () => {
+    if (!examDetails.year || !examDetails.term || !examDetails.examType) {
+      return;
+    }
+    setShowReportView(true);
+    setShowExamDetailsDialog(false);
+  };
 
   if (!classData) {
     return (
@@ -125,7 +179,7 @@ const ClassDetail = () => {
       </div>
 
       <Tabs defaultValue="students" className="space-y-6">
-        <TabsList className="grid w-full max-w-[400px] grid-cols-2">
+        <TabsList className="grid w-full max-w-[600px] grid-cols-3">
           <TabsTrigger value="students">
             <Users className="mr-2 h-4 w-4" />
             Students
@@ -133,6 +187,10 @@ const ClassDetail = () => {
           <TabsTrigger value="subjects">
             <BookOpen className="mr-2 h-4 w-4" />
             Subjects
+          </TabsTrigger>
+          <TabsTrigger value="report">
+            <FileBarChart className="mr-2 h-4 w-4" />
+            Report View
           </TabsTrigger>
         </TabsList>
 
@@ -198,7 +256,174 @@ const ClassDetail = () => {
           </Card>
         </TabsContent>
 
+        <TabsContent value="report">
+          <Card className="p-6">
+            {!showReportView ? (
+              <div className="text-center py-12">
+                <FileBarChart className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+                <h3 className="text-xl font-semibold text-foreground mb-2">
+                  Class Performance Report
+                </h3>
+                <p className="text-muted-foreground mb-6">
+                  View detailed performance analytics for all students
+                </p>
+                <Button onClick={handleViewReport}>
+                  Generate Report
+                </Button>
+              </div>
+            ) : (
+              <div>
+                <div className="mb-6">
+                  <h3 className="text-xl font-semibold text-foreground mb-2">
+                    Class Performance Report
+                  </h3>
+                  <div className="flex gap-4 text-sm text-muted-foreground">
+                    <span>Year: {examDetails.year}</span>
+                    <span>•</span>
+                    <span>Term: {examDetails.term}</span>
+                    <span>•</span>
+                    <span>Exam: {examDetails.examType}</span>
+                  </div>
+                </div>
+
+                <div className="rounded-md border overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="font-semibold">Roll No.</TableHead>
+                        <TableHead className="font-semibold">Student Name</TableHead>
+                        {classData.subjects.map((subject) => (
+                          <TableHead key={subject} className="font-semibold text-center">
+                            {subject}
+                          </TableHead>
+                        ))}
+                        <TableHead className="font-semibold text-center">Total</TableHead>
+                        <TableHead className="font-semibold text-center">Average</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {getStudentPerformance().map((student) => {
+                        const total = Object.values(student.marks).reduce((a, b) => a + b, 0);
+                        const average = (total / classData.subjects.length).toFixed(2);
+                        return (
+                          <TableRow key={student.id}>
+                            <TableCell className="font-medium">
+                              {student.rollNumber}
+                            </TableCell>
+                            <TableCell>{student.name}</TableCell>
+                            {classData.subjects.map((subject) => (
+                              <TableCell key={subject} className="text-center">
+                                {student.marks[subject]}
+                              </TableCell>
+                            ))}
+                            <TableCell className="text-center font-medium">
+                              {total}
+                            </TableCell>
+                            <TableCell className="text-center font-medium">
+                              {average}%
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                      <TableRow className="bg-muted/50 font-semibold">
+                        <TableCell colSpan={2}>Subject Average</TableCell>
+                        {classData.subjects.map((subject) => (
+                          <TableCell key={subject} className="text-center">
+                            {calculateSubjectAverage(subject)}
+                          </TableCell>
+                        ))}
+                        <TableCell colSpan={2}></TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </div>
+
+                <div className="mt-4">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setShowReportView(false);
+                      setExamDetails({ year: "", term: "", examType: "" });
+                    }}
+                  >
+                    Generate New Report
+                  </Button>
+                </div>
+              </div>
+            )}
+          </Card>
+        </TabsContent>
+
       </Tabs>
+
+      <Dialog open={showExamDetailsDialog} onOpenChange={setShowExamDetailsDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Enter Exam Details</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="year">Academic Year</Label>
+              <Input
+                id="year"
+                placeholder="e.g., 2024-2025"
+                value={examDetails.year}
+                onChange={(e) =>
+                  setExamDetails({ ...examDetails, year: e.target.value })
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="term">Term</Label>
+              <Select
+                value={examDetails.term}
+                onValueChange={(value) =>
+                  setExamDetails({ ...examDetails, term: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select term" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Term 1">Term 1</SelectItem>
+                  <SelectItem value="Term 2">Term 2</SelectItem>
+                  <SelectItem value="Term 3">Term 3</SelectItem>
+                  <SelectItem value="Annual">Annual</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="examType">Exam Type</Label>
+              <Select
+                value={examDetails.examType}
+                onValueChange={(value) =>
+                  setExamDetails({ ...examDetails, examType: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select exam type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Unit Test">Unit Test</SelectItem>
+                  <SelectItem value="Mid-Term">Mid-Term Exam</SelectItem>
+                  <SelectItem value="Final">Final Exam</SelectItem>
+                  <SelectItem value="Assignment">Assignment</SelectItem>
+                  <SelectItem value="Project">Project</SelectItem>
+                  <SelectItem value="Practical">Practical</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              onClick={handleExamDetailsSubmit}
+              disabled={!examDetails.year || !examDetails.term || !examDetails.examType}
+            >
+              Continue
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <AddStudentToClassDialog
         open={isAddStudentOpen}
