@@ -3,6 +3,22 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Download, Printer, ChevronRight } from "lucide-react";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Table,
   TableBody,
   TableCell,
@@ -157,6 +173,26 @@ const Reports = () => {
   const [selectedClass, setSelectedClass] = useState<ClassData | null>(null);
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [printAllMode, setPrintAllMode] = useState(false);
+  const [showExamDetailsDialog, setShowExamDetailsDialog] = useState(false);
+  const [tempSelectedClass, setTempSelectedClass] = useState<ClassData | null>(null);
+  const [examDetails, setExamDetails] = useState({
+    year: "",
+    term: "",
+    examType: "",
+  });
+
+  const handleClassClick = (classData: ClassData) => {
+    setTempSelectedClass(classData);
+    setShowExamDetailsDialog(true);
+  };
+
+  const handleExamDetailsSubmit = () => {
+    if (!examDetails.year || !examDetails.term || !examDetails.examType) {
+      return;
+    }
+    setSelectedClass(tempSelectedClass);
+    setShowExamDetailsDialog(false);
+  };
 
   const handleViewReport = (student: Student) => {
     setSelectedStudent(student);
@@ -596,7 +632,7 @@ const Reports = () => {
           <Card
             key={classData.id}
             className="p-6 cursor-pointer hover:shadow-lg transition-shadow border-2 hover:border-primary"
-            onClick={() => setSelectedClass(classData)}
+            onClick={() => handleClassClick(classData)}
           >
             <div className="flex justify-between items-start">
               <div>
@@ -615,6 +651,75 @@ const Reports = () => {
           </Card>
         ))}
       </div>
+
+      <Dialog open={showExamDetailsDialog} onOpenChange={setShowExamDetailsDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Enter Exam Details</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="year">Academic Year</Label>
+              <Input
+                id="year"
+                placeholder="e.g., 2024-2025"
+                value={examDetails.year}
+                onChange={(e) =>
+                  setExamDetails({ ...examDetails, year: e.target.value })
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="term">Term</Label>
+              <Select
+                value={examDetails.term}
+                onValueChange={(value) =>
+                  setExamDetails({ ...examDetails, term: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select term" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="term1">Term 1</SelectItem>
+                  <SelectItem value="term2">Term 2</SelectItem>
+                  <SelectItem value="term3">Term 3</SelectItem>
+                  <SelectItem value="annual">Annual</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="examType">Exam Type</Label>
+              <Select
+                value={examDetails.examType}
+                onValueChange={(value) =>
+                  setExamDetails({ ...examDetails, examType: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select exam type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="unit-test">Unit Test</SelectItem>
+                  <SelectItem value="mid-term">Mid-Term Exam</SelectItem>
+                  <SelectItem value="final">Final Exam</SelectItem>
+                  <SelectItem value="assignment">Assignment</SelectItem>
+                  <SelectItem value="project">Project</SelectItem>
+                  <SelectItem value="practical">Practical</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              onClick={handleExamDetailsSubmit}
+              disabled={!examDetails.year || !examDetails.term || !examDetails.examType}
+            >
+              Continue
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
